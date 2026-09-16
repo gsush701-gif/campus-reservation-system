@@ -1,0 +1,47 @@
+# Build output
+build/
+bin/
+out/
+
+# Compiled object files
+*.o
+*.obj
+
+# Precompiled headers
+*.gch
+*.pch
+
+# Compiled dynamic/static libraries
+*.so
+*.dylib
+*.dll
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Debug files
+*.dSYM/
+*.pdb
+*.ilk
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# IDE / editor files
+.vscode/
+.vs/
+*.suo
+*.user
+*.sln.docstates
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
