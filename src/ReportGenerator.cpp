@@ -6,6 +6,8 @@
 
 using namespace std;
 
+// Builds report records without reordering the original resources.
+// Waiting-list counts use the corresponding resource's original index.
 vector<ResourceRecord> ReportGenerator::buildResourceRecords(
     const vector<Resource>& resources,
     const ReservationManager& manager,
@@ -20,22 +22,17 @@ vector<ResourceRecord> ReportGenerator::buildResourceRecords(
         record.resourceId = resources[i].getResourceId();
         record.name = resources[i].getResourceName();
         record.type = resources[i].getResourceType();
-
-        if (resources[i].isAvailable())
-        {
-            record.status = "Available";
-        }
-        else
-        {
-            record.status = "Unavailable";
-        }
+        record.status = resources[i].isAvailable()
+                            ? "Available"
+                            : "Unavailable";
 
         record.reservationCount =
             manager.countReservationsForResource(record.resourceId);
 
         if (i < waitingLists.size())
         {
-            record.waitingCount = waitingLists[i].size();
+            record.waitingCount =
+                static_cast<int>(waitingLists[i].size());
         }
         else
         {
@@ -48,19 +45,23 @@ vector<ResourceRecord> ReportGenerator::buildResourceRecords(
     return records;
 }
 
+// Displays the active reservation list and its total count.
 void ReportGenerator::displayActiveReservations(
     const vector<Resource>& resources,
     const ReservationManager& manager,
     const vector<WaitingList>& waitingLists)
 {
-    cout << "\n===== Active Reservations =====\n\n";
+    (void)resources;
+    (void)waitingLists;
 
+    cout << "\n===== Active Reservations =====" << endl;
     manager.displayReservations();
 
     cout << "\nTotal active reservations: "
          << manager.countReservations() << endl;
 }
 
+// Displays reservation and waiting-list counts for every resource.
 void ReportGenerator::displayResourceUtilization(
     const vector<Resource>& resources,
     const ReservationManager& manager,
@@ -69,29 +70,38 @@ void ReportGenerator::displayResourceUtilization(
     vector<ResourceRecord> records =
         buildResourceRecords(resources, manager, waitingLists);
 
-    cout << "\n===== Resource Utilization =====\n\n";
+    cout << "\n===== Resource Utilization =====" << endl;
 
     cout << left
-         << setw(10) << "ID"
-         << setw(22) << "Name"
-         << setw(20) << "Reservations"
-         << '\n';
+         << setw(12) << "ID"
+         << setw(25) << "Name"
+         << setw(22) << "Type"
+         << setw(14) << "Status"
+         << setw(15) << "Reservations"
+         << setw(12) << "Waiting"
+         << endl;
 
-    cout << string(52, '-') << '\n';
+    cout << string(100, '-') << endl;
 
     for (const ResourceRecord& record : records)
     {
         cout << left
-             << setw(10) << record.resourceId
-             << setw(22) << record.name
-             << setw(20) << record.reservationCount
-             << '\n';
+             << setw(12) << record.resourceId
+             << setw(25) << record.name
+             << setw(22) << record.type
+             << setw(14) << record.status
+             << setw(15) << record.reservationCount
+             << setw(12) << record.waitingCount
+             << endl;
     }
 
-    cout << "\nTotal active reservations: "
+    cout << "\nTotal resources: " << resources.size() << endl;
+
+    cout << "Total active reservations: "
          << manager.countReservations() << endl;
 }
 
+// Displays the five most requested resources, excluding zero counts.
 void ReportGenerator::displayMostRequested(
     const vector<Resource>& resources,
     const ReservationManager& manager,
@@ -100,85 +110,158 @@ void ReportGenerator::displayMostRequested(
     vector<ResourceRecord> records =
         buildResourceRecords(resources, manager, waitingLists);
 
+    // Sorting returns a copy, preserving the original resource order.
     vector<ResourceRecord> sortedRecords =
         Sorting::sortByReservationCount(records);
 
-    cout << "\n===== Most Requested Resources =====\n\n";
+    cout << "\n===== Most Requested Resources =====" << endl;
 
     if (sortedRecords.empty() ||
         sortedRecords[0].reservationCount == 0)
     {
-        cout << "No reservations yet.\n";
+        cout << "No reservations yet." << endl;
         return;
     }
 
     cout << left
-         << setw(10) << "Rank"
-         << setw(10) << "ID"
-         << setw(22) << "Name"
+         << setw(8)  << "Rank"
+         << setw(12) << "ID"
+         << setw(25) << "Name"
+         << setw(22) << "Type"
+         << setw(14) << "Status"
          << setw(15) << "Reservations"
-         << '\n';
+         << setw(12) << "Waiting"
+         << endl;
 
-    cout << string(57, '-') << '\n';
+    cout << string(108, '-') << endl;
 
     int rank = 1;
-    int displayed = 0;
 
     for (const ResourceRecord& record : sortedRecords)
     {
-        if (record.reservationCount == 0)
+        // Stop when no reservations remain or the top five are shown.
+        if (record.reservationCount == 0 || rank > 5)
         {
             break;
         }
 
         cout << left
-             << setw(10) << rank
-             << setw(10) << record.resourceId
-             << setw(22) << record.name
+             << setw(8)  << rank
+             << setw(12) << record.resourceId
+             << setw(25) << record.name
+             << setw(22) << record.type
+             << setw(14) << record.status
              << setw(15) << record.reservationCount
-             << '\n';
+             << setw(12) << record.waitingCount
+             << endl;
 
         rank++;
-        displayed++;
-
-        if (displayed == 5)
-        {
-            break;
-        }
     }
 }
 
+// Displays waiting-list counts and summary statistics.
 void ReportGenerator::displayWaitingListStatistics(
     const vector<Resource>& resources,
     const ReservationManager& manager,
     const vector<WaitingList>& waitingLists)
 {
+    (void)manager;
+
+    cout << "\n===== Waiting-List Statistics =====" << endl;
+
+    cout << left
+         << setw(12) << "ID"
+         << setw(25) << "Resource"
+         << setw(15) << "Waiting"
+         << endl;
+
+    cout << string(52, '-') << endl;
+
+    int totalWaiting = 0;
+    int resourcesWithWaiting = 0;
+
+    for (size_t i = 0; i < resources.size(); i++)
+    {
+        int waitingCount = 0;
+
+        if (i < waitingLists.size())
+        {
+            waitingCount =
+                static_cast<int>(waitingLists[i].size());
+        }
+
+        totalWaiting += waitingCount;
+
+        if (waitingCount > 0)
+        {
+            resourcesWithWaiting++;
+        }
+
+        cout << left
+             << setw(12) << resources[i].getResourceId()
+             << setw(25) << resources[i].getResourceName()
+             << setw(15) << waitingCount
+             << endl;
+    }
+
+    cout << "\nTotal students waiting: " << totalWaiting << endl;
+
+    cout << "Resources with waiting students: "
+         << resourcesWithWaiting << endl;
+}
+
+// Displays a sorted copy of the resource records.
+void ReportGenerator::displaySortedResources(
+    const vector<Resource>& resources,
+    const ReservationManager& manager,
+    const vector<WaitingList>& waitingLists,
+    int sortChoice)
+{
     vector<ResourceRecord> records =
         buildResourceRecords(resources, manager, waitingLists);
 
-    cout << "\n===== Waiting-List Statistics =====\n\n";
+    vector<ResourceRecord> sortedRecords;
 
-    cout << left
-         << setw(10) << "ID"
-         << setw(22) << "Name"
-         << setw(18) << "Waiting"
-         << '\n';
-
-    cout << string(50, '-') << '\n';
-
-    int totalWaiting = 0;
-
-    for (const ResourceRecord& record : records)
+    // Select the sorting method requested by the user.
+    if (sortChoice == 1)
     {
-        cout << left
-             << setw(10) << record.resourceId
-             << setw(22) << record.name
-             << setw(18) << record.waitingCount
-             << '\n';
+        sortedRecords = Sorting::sortByName(records);
 
-        totalWaiting += record.waitingCount;
+        cout << "\n===== Resources Sorted by Name =====" << endl;
+    }
+    else if (sortChoice == 2)
+    {
+        sortedRecords = Sorting::sortByReservationCount(records);
+
+        cout << "\n===== Resources Sorted by Reservation Count ====="
+             << endl;
+    }
+    else
+    {
+        cout << "Invalid sorting choice." << endl;
+        return;
     }
 
-    cout << "\nTotal students waiting: "
-         << totalWaiting << endl;
+    cout << left
+         << setw(12) << "ID"
+         << setw(25) << "Name"
+         << setw(22) << "Type"
+         << setw(14) << "Status"
+         << setw(15) << "Reservations"
+         << setw(12) << "Waiting"
+         << endl;
+
+    cout << string(100, '-') << endl;
+
+    for (const ResourceRecord& record : sortedRecords)
+    {
+        cout << left
+             << setw(12) << record.resourceId
+             << setw(25) << record.name
+             << setw(22) << record.type
+             << setw(14) << record.status
+             << setw(15) << record.reservationCount
+             << setw(12) << record.waitingCount
+             << endl;
+    }
 }
