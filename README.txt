@@ -56,6 +56,9 @@ g++ -Iinclude -c src/ReservationManager.cpp -o ReservationManager.o
 g++ -Iinclude -c src/CancellationHistory.cpp -o CancellationHistory.o
 g++ -Iinclude -c src/WaitingList.cpp -o WaitingList.o
 g++ -Iinclude -c src/Student.cpp -o Student.o
+g++ -Iinclude -c src/Sorting.cpp -o Sorting.o
+g++ -Iinclude -c src/ReportGenerator.cpp -o ReportGenerator.o
+g++ -Iinclude -c src/Searching.cpp -o Searching.o
 
 Then create the executable:
 

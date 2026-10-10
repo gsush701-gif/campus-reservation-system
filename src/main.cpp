@@ -11,6 +11,7 @@
 #include "CancellationHistory.h"
 #include "WaitingList.h"
 #include "ReportGenerator.h"
+#include "Searching.h"
 
 using namespace std;
 
@@ -107,19 +108,11 @@ int main()
             cout << "Enter Resource ID: ";
             cin >> resourceId;
 
-            int resourceIndex = -1;
-
             // Find the resource and its corresponding waiting list.
-            for (int i = 0; i < static_cast<int>(resources.size()); i++)
-            {
-                if (resources[i].getResourceId() == resourceId)
-                {
-                    resourceIndex = i;
-                    break;
-                }
-            }
+            int resourceIndex =
+                Searching::searchResourceById(resources, resourceId);
 
-            if (resourceIndex == -1)
+            if (resourceIndex == Searching::NOT_FOUND)
             {
                 cout << "Invalid Resource ID." << endl;
                 break;
@@ -199,18 +192,10 @@ int main()
 
             cout << "Reservation cancelled successfully." << endl;
 
-            int resourceIndex = -1;
+            int resourceIndex =
+                Searching::searchResourceById(resources, resourceId);
 
-            for (int i = 0; i < static_cast<int>(resources.size()); i++)
-            {
-                if (resources[i].getResourceId() == resourceId)
-                {
-                    resourceIndex = i;
-                    break;
-                }
-            }
-
-            if (resourceIndex == -1)
+            if (resourceIndex == Searching::NOT_FOUND)
             {
                 cout << "Resource not found." << endl;
                 break;
@@ -333,7 +318,7 @@ int main()
                 cout << "\n===== Search =====" << endl;
                 cout << "1. Search by Reservation ID" << endl;
                 cout << "2. Search by Student ID" << endl;
-                cout << "3. Search by Resource ID (Coming Soon)" << endl;
+                cout << "3. Search by Resource ID" << endl;
                 cout << "4. Back to Main Menu" << endl;
                 cout << "Enter your choice: ";
 
@@ -428,9 +413,24 @@ int main()
 
                 case 3:
                 {
-                    // Resource ID search will be added later.
-                    cout << "Search by Resource ID is coming soon."
-                         << endl;
+                    // Search for one resource by its ID.
+                    string resourceId;
+
+                    cout << "Enter Resource ID: ";
+                    cin >> resourceId;
+
+                    int resourceIndex =
+                        Searching::searchResourceById(resources, resourceId);
+
+                    if (resourceIndex == Searching::NOT_FOUND)
+                    {
+                        cout << "Resource not found." << endl;
+                    }
+                    else
+                    {
+                        resources[resourceIndex].display();
+                    }
+
                     break;
                 }
 
