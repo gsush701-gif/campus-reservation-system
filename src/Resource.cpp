@@ -1,49 +1,37 @@
+
 #include "Resource.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
 
 Resource::Resource(string resourceId, string resourceName, string resourceType, bool available) {
-
-    this->resourceId=resourceId;
-    this->resourceName=resourceName;
-    this->resourceType=resourceType;
-    this->available=available;
-
+    this->resourceId = resourceId;
+    this->resourceName = resourceName;
+    this->resourceType = resourceType;
+    this->available = available;
 }
 
 string Resource::getResourceId() const {
-
     return resourceId;
-
 }
 
 string Resource::getResourceName() const {
-
     return resourceName;
-
 }
 
 string Resource::getResourceType() const {
-
     return resourceType;
-
 }
 
 bool Resource::isAvailable() const {
-
     return available;
-
 }
 
 void Resource::setIsAvailable(bool available) {
-
     this->available = available;
-
 }
 
 void Resource::display() const {
-
     cout << "ID: " << resourceId
          << " | Name: " << resourceName
          << " | Type: " << resourceType
@@ -57,11 +45,9 @@ void Resource::display() const {
     }
 
     cout << endl;
-
 }
 
 vector<Resource> loadResources(string filename) {
-
     vector<Resource> Resources;
 
     ifstream inFile(filename);
@@ -74,6 +60,14 @@ vector<Resource> loadResources(string filename) {
     string line;
 
     while (getline(inFile, line)) {
+
+        if (!line.empty() && line.back() == '\r') {
+            line.pop_back();
+        }
+
+        if (line.empty()) {
+            continue;
+        }
 
         stringstream ss(line);
 
