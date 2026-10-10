@@ -16,15 +16,17 @@ This project is a C++ program for managing campus resource reservations. Users c
 
 4. FEATURES AND DATA STRUCTURES
 
-The program includes:
+The program runs from an 11-option menu. It includes:
 
 * Loading and displaying campus resources
 * Creating and cancelling reservations
 * Checking for date conflicts
-* Managing waiting lists
-* Automatically assigning resources when possible
-* Undoing cancelled reservations
-* Keeping cancellation history
+* Viewing active reservations, waiting lists, and cancellation history
+* Waiting lists that remember each student's requested date. When a reservation is cancelled, the slot goes to the first student waiting for that same date.
+* Undoing the most recent cancellation. Undo is refused if the slot has been taken since.
+* Searching by reservation ID, student ID, or resource ID
+* Sorting resources by name or by reservation count. Sorting works on a copy, so the original resource order does not change.
+* Reports for active reservations, resource utilization, most requested resources, and waiting-list statistics
 
 The project uses four main data structures:
 
@@ -32,6 +34,8 @@ The project uses four main data structures:
 * Linked list for active reservations
 * Queue for waiting lists
 * Stack for cancellation history
+
+Sorting uses a merge sort and searching uses a linear search. Both are written by hand instead of using library functions.
 
 5. FILE STRUCTURE AND DATA FORMAT
 
@@ -56,6 +60,9 @@ g++ -Iinclude -c src/ReservationManager.cpp -o ReservationManager.o
 g++ -Iinclude -c src/CancellationHistory.cpp -o CancellationHistory.o
 g++ -Iinclude -c src/WaitingList.cpp -o WaitingList.o
 g++ -Iinclude -c src/Student.cpp -o Student.o
+g++ -Iinclude -c src/Sorting.cpp -o Sorting.o
+g++ -Iinclude -c src/ReportGenerator.cpp -o ReportGenerator.o
+g++ -Iinclude -c src/Searching.cpp -o Searching.o
 
 Then create the executable:
 
